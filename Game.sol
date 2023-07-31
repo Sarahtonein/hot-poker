@@ -49,8 +49,13 @@ contract Game {
         emit Withdraw(msg.sender, amount);
     }
 
-    function plantASeed(uint256 _wagerAmount) external {
+    function plantASeed() external view returns (bool){
 
+       if (!playerwin) {
+        //player wins
+       }else {
+        //they lose
+       }
         //call generate Randomness function as part of thius.
         // if(generateRandomness();)
         //Do we want to return a value?
