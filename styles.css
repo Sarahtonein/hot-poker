@@ -3,7 +3,31 @@
     color: red;
 }
 
+
+
 p {
     color: red;
+    text-align: center;
+  }
+
+body {
+    background-color: black;
+}
+  
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  
+  .image-container {
+    flex: 0 0 auto;
+    margin: 5px; /* Optional margin between elements */
+  }
+  
+  .button-container {
+    flex: 0 0 auto;
+    margin: 5px; /* Optional margin between elements */
   }
   
