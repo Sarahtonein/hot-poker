@@ -1,0 +1,24 @@
+{
+  "name": "hot-poker",
+  "version": "1.0.0",
+  "description": "A gambling game, for gamblers",
+  "main": "deploy.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sarahtonein/hot-poker.git"
+  },
+  "author": "Sarahtonein",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Sarahtonein/hot-poker/issues"
+  },
+  "homepage": "https://github.com/Sarahtonein/hot-poker#readme",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.17.0"
+  }
+}
