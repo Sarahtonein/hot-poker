@@ -1,24 +1,17 @@
 {
   "name": "hot-poker",
   "version": "1.0.0",
-  "description": "A gambling game, for gamblers",
+  "description": "Gambling game",
   "main": "deploy.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Sarahtonein/hot-poker.git"
-  },
-  "author": "Sarahtonein",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Sarahtonein/hot-poker/issues"
-  },
-  "homepage": "https://github.com/Sarahtonein/hot-poker#readme",
-  "devDependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.2.3",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
     "ethers": "^5.7.2",
-    "hardhat": "^2.17.0"
+    "ethersjs": "^0.0.1-security",
+    "fs-extra": "^11.1.1",
+    "solc": "^0.8.21"
+  },
+  "scripts": {
+    "compile": "solcjs --bin --abi --include-path node_modules/ --base-path . -o . Game.sol"
   }
 }

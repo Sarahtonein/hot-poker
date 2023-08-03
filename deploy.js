@@ -1,30 +1,19 @@
-const { ethers, upgrades } = require("hardhat");
+const ethers = require("ethers");
+const fs = require("fs-extra");
 
 async function main() {
-  try {
-    // Specify the private key of the deployer account
-    const privateKey = "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e";
-    const providerURL = "http://localhost:8545"; // URL for the local Hardhat network
+    
+    const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:7545");
 
-    // Create a new provider using the URL
-    const provider = new ethers.providers.JsonRpcProvider(providerURL);
-
-    // Create a new wallet instance for the deployer using the private key and provider
-    const deployerWallet = new ethers.Wallet(privateKey, provider);
-
-    console.log("Deploying contracts with the account:", deployerWallet.address);
-
-    // Load your smart contract
-    const Contract = await ethers.getContractFactory("Game");
-    const contract = await upgrades.deployProxy(Contract, [], { initializer: "initialize" });
-
-    await contract.deployed();
-
-    console.log("Contract deployed to address:", contract.address);
-  } catch (error) {
-    console.error("Deployment error:", error);
-    process.exit(1);
-  }
+    const wallet = new ethers.Wallet("0x424d3b78208f41b6685e776791b4a8db03585f21d7d7069dae492b0b7d6a0366", provider);
+    const abi = fs.readFileSync("./Game_sol_Game.abi", "utf8");
+    const binary = fs.readFileSync("./Game_sol_Game.bin", "utf8");
+    const contractFactory = new ethers.ContractFactory(abi, binary, wallet);
+    console.log("deploying.. please wait..");
+    const contract = await contractFactory.deploy(); // stop here, wait for contract to finish
+    console.log(contract);
 }
 
-main();
+main()
+.then(() => process.exit(0))
+.catch((error)=> console.log(error));
