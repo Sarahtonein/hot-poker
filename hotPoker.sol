@@ -38,15 +38,18 @@ contract hotPoker is Ownable {
         return addressToBalance[msg.sender];
     }
 
-    function playAGame() external view returns(bool){
+    function playAGame(uint256 _betAmount) external returns(bool){
         // Implement your logic here for the game
+        require(addressToBalance[msg.sender] != 0, "Must deposit before playing");
         uint256 randomNumber = _random();
         bool trueorFalse; 
-        if(randomNumber % 5 >= 500) {
+        if(randomNumber % 2 == 0) {
             trueorFalse = true;
+            addressToBalance[msg.sender] += _betAmount * 2;
             return trueorFalse;
         } else {
             trueorFalse = false;
+            addressToBalance[msg.sender] -= _betAmount;
             return trueorFalse;
         }
         //fire event
