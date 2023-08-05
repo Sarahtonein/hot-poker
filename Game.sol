@@ -1,16 +1,56 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-// Game of hot and cold; decentralized.
-//4x hot/cold
-//1x rainbow
-// 1x black 1x white
+contract hotPoker is Ownable {
 
+    /*@DEV TODO
+        Implement ChainLink VRF
+        Events that log what happens within the game
+    */
+    uint256 private MAXNUMBER = 10;
+    uint256 private MINNUMBER = 0;
 
-// Who particiapted in the Sand Casino? Who fought and won epic battles, reaching untold riches...Just to lose it all again?
-// Who planted the seeds that grew the flowers that rotate hands in the GE?
-// To those who hosted, those who got roasted, those who just straight up suck; this nostalgia is for you.
+    mapping(address => uint) addressToBalance;
 
-// SPDX-License-Identifier: SEE LICENSE IN LICENSE
-pragma solidity ^0.8.21;
+    function depositFunds() external payable {
+        addressToBalance[msg.sender] += msg.value;
+        //Fire event
+    }
 
-contract Game { 
+    function _random() internal view returns(uint256) {
+        uint256 randomNumber = block.difficulty;
+        return randomNumber;
+    }
+
+    function withdrawDeposit(uint _withdrawalAmount) external {
+    // Check if the sender has a non-zero balance
+        require(addressToBalance[msg.sender] >= _withdrawalAmount, "Insufficient balance");
+
+    // Subtract the withdrawal amount from the sender's balance
+        addressToBalance[msg.sender] -= _withdrawalAmount;
+
+    // Transfer the ETH to the sender
+        payable(msg.sender).transfer(_withdrawalAmount);
+
+    // Fire event
+}
+
+    function checkBalance() external view returns (uint) {
+        return addressToBalance[msg.sender];
+    }
+
+    function playAGame() external view returns(bool){
+        // Implement your logic here for the game
+        uint256 randomNumber = _random();
+        bool trueorFalse; 
+        if(randomNumber % 5 >= 500) {
+            trueorFalse = true;
+            return trueorFalse;
+        } else {
+            trueorFalse = false;
+            return trueorFalse;
+        }
+        //fire event
+    }
 }
