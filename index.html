@@ -5,23 +5,29 @@
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-    
-    <p>Hot and Cold</p>
     <div class="container">
-    <div id="divImage1" class="image-container">
-    <img id="flower1" src="./flowers.png"> 
+        <div id="divImage1" class="image-container">
+            <img id="flower1" src="./Assorted_flowers_equipped.png"> 
+        </div>
+        <div id="divButtons" class="button-container">
+            <button id="connect" class="button">Connect to MetaMask</button>
+            <button id="disconnect" class="button">Disconnect</button>
+            <button id="deposit" class="button">Deposit Funds</button>
+            <input type="number" id="depositAmount" placeholder="Enter deposit amount in ETH">
+    
+            <button id="withdraw" class="button">Withdraw Funds</button>
+            <input type="number" id="withdrawAmount" placeholder="Enter a withdrawal amount in ETH">
+            <button id="playAGame" class="button">Play a game</button>
+            <input type="number" id="gambleAmount" placeholder="Enter a bet amount">
+        
+            <button id="checkBalance" class="button">View Balance</button>
+            <div id="balanceContainer"></div>
+        </div>
+        <div id="flower2" class="image-container">
+            
+        </div>
     </div>
-    <div id="divButtons" class="button-container">
-    <button id="deposit" class="button">Deposit Funds</button>
-    <button id="withdraw" class="button">Withdraw Funds</button>
-    <button id="playAGame" class="button">Plant a seed</button>
-    <button id="checkBalance" class="button">View Balance</button>
-    </div>
-    <div id="flower2" class="image-container">
-    <img id="flower2" src="./flowers2.png">
-    </div>
-</div>
-    <script src="./deploy.js"></script>
     <script src="./script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.5.2/web3.min.js"></script>
 </body>
 </html>
