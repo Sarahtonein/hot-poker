@@ -31,18 +31,18 @@ contract hotPoker is Ownable {
         return addressToBalance[msg.sender];
     }
 
-    function playAGame(uint256 _betAmount) external returns(bool){
+   function playAGame(uint256 _betAmount) external view returns (bool) {
         require(_betAmount > 0, "You must bet some amount");
-        addressToBalance[msg.sender] -= _betAmount;
+        require(addressToBalance[msg.sender > 0, "You must have some eth");
         uint256 letsGetANumber = getRandomNumber();
     
         if(letsGetANumber < 50){
-           addressToBalance[msg.sender] += _betAmount * 2;
+            addressToBalance[msg.sender] += _betAmount *2;   
             return true;
         } else {
+            addressToBalance[msg.sender] -= _betAmount;
             return false;
-    }
-
+        }
     }
 }
 
