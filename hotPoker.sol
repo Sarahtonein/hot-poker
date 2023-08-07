@@ -16,42 +16,33 @@ contract hotPoker is Ownable {
         //Fire event
     }
 
-    function _random() internal view returns(uint256) {
-        uint256 randomNumber = block.difficulty;
-        return randomNumber;
+    function withdrawFunds(uint256 _withdrawalAmount) external {
+        require(_withdrawalAmount > 0, "Must withdraw some amount");
+        addressToBalance[msg.sender] -= _withdrawalAmount;
+        payable(msg.sender).transfer(_withdrawalAmount);
     }
 
-    function withdrawDeposit(uint _withdrawalAmount) external {
-    // Check if the sender has a non-zero balance
-        require(addressToBalance[msg.sender] >= _withdrawalAmount, "Insufficient balance");
+    function getRandomNumber() public view returns (uint256) {
+        uint256 randomNumber = uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty)));
+        return (randomNumber % 100) + 1;
+    }
 
-    // Subtract the withdrawal amount from the sender's balance
-        addressToBalance[msg.sender] -= _withdrawalAmount;
-
-    // Transfer the ETH to the sender
-        payable(msg.sender).transfer(_withdrawalAmount);
-
-    // Fire event
-}
-
-    function checkBalance() external view returns (uint) {
+    function checkBalance() public view returns (uint) {
         return addressToBalance[msg.sender];
     }
 
     function playAGame(uint256 _betAmount) external returns(bool){
-        // Implement your logic here for the game
-        require(addressToBalance[msg.sender] != 0, "Must deposit before playing");
-        uint256 randomNumber = _random();
-        bool trueorFalse; 
-        if(randomNumber % 2 == 0) {
-            trueorFalse = true;
-            addressToBalance[msg.sender] += _betAmount * 2;
-            return trueorFalse;
+        require(_betAmount > 0, "You must bet some amount");
+        addressToBalance[msg.sender] -= _betAmount;
+        uint256 letsGetANumber = getRandomNumber();
+    
+        if(letsGetANumber < 50){
+           addressToBalance[msg.sender] += _betAmount * 2;
+            return true;
         } else {
-            trueorFalse = false;
-            addressToBalance[msg.sender] -= _betAmount;
-            return trueorFalse;
-        }
-        //fire event
+            return false;
+    }
+
     }
 }
+
