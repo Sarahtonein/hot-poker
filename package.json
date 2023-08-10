@@ -1,19 +1,8 @@
 {
-  "name": "hot-poker",
-  "version": "1.0.0",
-  "description": "Gambling game",
-  "main": "deploy.js",
-  "author": "",
-  "license": "ISC",
+  "name": "hardhat-project",
   "dependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@openzeppelin/contracts": "^4.9.3",
-    "ethers": "^5.7.2",
-    "ethersjs": "^0.0.1-security",
-    "fs-extra": "^11.1.1",
-    "solc": "^0.8.21",
-    "web3": "^4.0.3"
-  },
-  "scripts": {
-    "compile": "solcjs --bin --abi --include-path node_modules/ --base-path . -o . Game.sol"
+    "dotenv": "^16.3.1"
   }
 }

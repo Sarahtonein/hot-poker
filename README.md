@@ -1,24 +1,13 @@
-# hot-poker
-poker game, kinda, not really.
+# Sample Hardhat Project
 
-**LOCAL DEPLOYMENT**
+This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
 
-**Local webserver** 
-First we want to install package http-server
-```npm install http-server //optionally use -g flag to install globally ```
-To specify a folder to open in browser upon starting server:
-```http-server -o ./index.html```
+Try running some of the following tasks:
 
-**SOLCJS (Replace with hardhat)**
-Initialize a project:
-```npm init```
-Intall solcjs dependencies:
-```npm install -g solcjs```
-Compile the smart contract to receive ABI + BIN (To be used in deploy.js with etherjs)
-``` solcjs --bin --abi --include-path node_modules/ --base-path . -o . Game.sol ```
-(This can be added to package.json to automate)
-
-
-
-
-
+```shell
+npx hardhat help
+npx hardhat test
+REPORT_GAS=true npx hardhat test
+npx hardhat node
+npx hardhat run scripts/deploy.js
+```
