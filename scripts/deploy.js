@@ -3,9 +3,9 @@ const { ethers } = require("hardhat");
 
 async function main() {
   
-  const hotpoker = await ethers.deployContract("hotPoker");
+  const hotPoker = await ethers.deployContract("hotPoker");
   
-  console.log("Address is", await hotpoker.getAddress());
+  console.log("Address is", await hotPoker.getAddress());
 }
 
 main()
