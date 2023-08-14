@@ -6,100 +6,139 @@ import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract hotPoker is Ownable, VRFV2WrapperConsumerBase {
-    uint256 internal callbackGasLimit = 100000; // Example value
-    uint256 internal requestConfirmations = 3; // Example value
-    uint32 internal numWords = 1; // Example value
+    uint32 internal callbackGasLimit = 100000;
+    uint16 internal requestConfirmations = 3;
+    uint32 internal numWords = 1;
 
-    enum FlowerColor {
-        Red,
-        Blue,
-        Yellow,
-        Purple,
-        Orange,
-        Mixed,
-        Assorted,
-        Black,
-        White
-    }
+    //0x326C977E6efc84E512bB9C30f76E30c160eD06FB - LINK Goerli Token address
+    //0x708701a1DfF4f478de54383E49a627eD4852C816 - VRF Wrapper
 
-    enum Guess {
-        Hot,
-        Cold
-    }
+    //Do we take the balance from the users mapping when a bet is placed?
+    //Can this be exploited if we don't?
 
-    mapping(address => Guess) public addressToGuess;
-    mapping(address => uint256) public addressToBet;
-    mapping(address => uint256) public addressToRequestId;
-    mapping(address => uint) public addressToBalance;
-
+    /*@DEV TODO
+        //Implement events and error handling
+        */
     constructor(
-        address _linkToken,
-        address _vrfWrapper
-    ) Ownable() VRFV2WrapperConsumerBase(_linkToken, _vrfWrapper) {}
+        address _link,
+        address _vrfV2Wrapper
+    ) Ownable() VRFV2WrapperConsumerBase(_link, _vrfV2Wrapper) {}
 
-    function plantASeed(Guess _playerGuess) external {
-        require(
-            _playerGuess == Guess.Hot || _playerGuess == Guess.Cold,
-            "Invalid guess"
-        );
-        addressToGuess[msg.sender] = _playerGuess;
+    //lastRequestId() - get the ID of your request
+    //Add our options as an enum.
+
+    enum FlowerTypes {
+        Blue,
+        Red,
+        Orange,
+        Assorted,
+        Mixed,
+        Purple,
+        Yellow,
+        White,
+        Black
+    }
+
+    mapping(address => uint256) public addressToBalance;
+    mapping(address => string) public currentGuess;
+    mapping(address => uint256) public gambleAmount;
+    mapping(address => uint256) public winOrLose;
+
+    event randomEvent(uint256 _random);
+    event requestIdEvent(uint256 _requestId);
+    event debugEvent(string _str);
+    event flowerResult(FlowerTypes flower);
+
+    event flowerTypeEvent(FlowerTypes flower);
+
+    function playAGame(
+        uint256 _gambleAmount,
+        string memory _hotOrCold
+    ) external {
+        require(addressToBalance[msg.sender] > 0, "Must bet some amount");
+        if (
+            keccak256(abi.encodePacked(_hotOrCold)) !=
+            keccak256(abi.encodePacked("Hot")) &&
+            keccak256(abi.encodePacked(_hotOrCold)) !=
+            keccak256(abi.encodePacked("Cold"))
+        ) {
+            revert("Must pick hot or cold"); // require(_gambleAmount > 0, "Must play with some amount");
+            //Do we or can we call the other functions here to get the result?
+        }
+        currentGuess[msg.sender] = _hotOrCold;
+        gambleAmount[msg.sender] = _gambleAmount;
+
         requestRandomness(callbackGasLimit, requestConfirmations, numWords);
     }
 
     function calculateFlowerColor(
         uint256 _random
-    ) internal pure returns (FlowerColor) {
-        if (_random < 14080) return FlowerColor.Red;
-        else if (_random < 29310) return FlowerColor.Blue;
-        else if (_random < 43675) return FlowerColor.Yellow;
-        else if (_random < 62160) return FlowerColor.Purple;
-        else if (_random < 76000) return FlowerColor.Orange;
-        else if (_random < 89666) return FlowerColor.Mixed;
-        else if (_random < 99744) return FlowerColor.Assorted;
-        else if (_random < 99944) return FlowerColor.Black;
-        else return FlowerColor.White;
+    ) internal returns (FlowerTypes) {
+        //this fires
+        emit randomEvent(_random);
+        if (_random < 70000) return FlowerTypes.Red;
+        else if (_random < 200000) return FlowerTypes.Blue;
+        else if (_random < 350000) return FlowerTypes.Yellow;
+        else if (_random < 450000) return FlowerTypes.Purple;
+        else if (_random < 650000) return FlowerTypes.Orange;
+        else if (_random < 800000) return FlowerTypes.Mixed;
+        else if (_random < 900000) return FlowerTypes.Assorted;
+        else if (_random < 999000) return FlowerTypes.Black;
+        else return FlowerTypes.White;
     }
 
     function fulfillRandomWords(
         uint256 _requestId,
         uint256[] memory _randomWords
-    ) internal override {
-        require(_randomWords.length > 0, "No random words provided");
+    ) internal override(VRFV2WrapperConsumerBase) {
+        emit requestIdEvent(_requestId);
+        // uint256 random = _randomWords[0] % 1000000;
+        emit debugEvent("Before flowerTypeEvent");
+        FlowerTypes flower = calculateFlowerColor(_randomWords[0] % 1000000);
+        //Indicating this is called^^
+        emit debugEvent("After flowerTypeEvent");
 
-        // Get the first random number from the array
-        uint256 random = _randomWords[0] % 1000000; // Ensure the random number is within 0-999999 range
-
-        FlowerColor flower = calculateFlowerColor(random);
-        Guess playerGuess = addressToGuess[msg.sender];
-        uint256 betAmount = addressToBet[msg.sender];
+        bytes32 hotHash = keccak256(abi.encodePacked("Hot"));
+        bytes32 coldHash = keccak256(abi.encodePacked("Cold"));
+        bytes32 guessHash = keccak256(
+            abi.encodePacked(currentGuess[msg.sender])
+        );
 
         if (
-            (flower == FlowerColor.Red ||
-                flower == FlowerColor.Yellow ||
-                flower == FlowerColor.Orange) && playerGuess == Guess.Hot
+            flower == FlowerTypes.Mixed ||
+            flower == FlowerTypes.Black ||
+            flower == FlowerTypes.White
         ) {
-            addressToBalance[msg.sender] += betAmount * 2;
-        } else if (
-            (flower == FlowerColor.Blue ||
-                flower == FlowerColor.Purple ||
-                flower == FlowerColor.Assorted) && playerGuess == Guess.Cold
-        ) {
-            addressToBalance[msg.sender] += betAmount * 2;
+            emit flowerResult(flower);
+            if (flower == FlowerTypes.Black || flower == FlowerTypes.White) {
+                addressToBalance[msg.sender] += gambleAmount[msg.sender] * 5;
+            } else {
+                addressToBalance[msg.sender] -= gambleAmount[msg.sender];
+                winOrLose[msg.sender] -= 1;
+            }
         } else {
-            addressToBalance[msg.sender] -= betAmount;
+            if (
+                (guessHash == hotHash &&
+                    (flower == FlowerTypes.Red ||
+                        flower == FlowerTypes.Orange ||
+                        flower == FlowerTypes.Yellow)) ||
+                (guessHash == coldHash &&
+                    (flower == FlowerTypes.Blue ||
+                        flower == FlowerTypes.Purple ||
+                        flower == FlowerTypes.Assorted))
+            ) {
+                emit flowerResult(flower);
+                addressToBalance[msg.sender] += gambleAmount[msg.sender] * 2;
+                winOrLose[msg.sender] += 1;
+            } else {
+                emit flowerResult(flower);
+                addressToBalance[msg.sender] += gambleAmount[msg.sender] * 2;
+            }
         }
-
-        // Clear player data
-        delete addressToGuess[msg.sender];
-        delete addressToBet[msg.sender];
-        delete addressToRequestId[msg.sender];
-
-        // Your other existing logic to handle fulfilled random words
     }
 
     function depositFunds() external payable {
         addressToBalance[msg.sender] += msg.value;
-        // Fire event
     }
 
     function withdrawFunds(uint256 _withdrawalAmount) external {
@@ -111,27 +150,12 @@ contract hotPoker is Ownable, VRFV2WrapperConsumerBase {
     function checkBalance() external view returns (uint) {
         return addressToBalance[msg.sender];
     }
+}
 
-    function playAGame(uint256 _betAmount, Guess _playerGuess) external {
-        require(_betAmount > 0, "You must bet some amount");
-        require(
-            _playerGuess == Guess.Hot || _playerGuess == Guess.Cold,
-            "Invalid guess"
-        );
-        require(
-            addressToBalance[msg.sender] >= _betAmount,
-            "Insufficient balance"
-        );
-
-        addressToBet[msg.sender] = _betAmount;
-        plantASeed(_playerGuess);
-    }
-
-    /*function withdrawLink() external onlyOwner {
+/*function withdrawLink() external onlyOwner {
         LinkTokenInterface link = LinkTokenInterface(linkAddress);
         require(
             link.transfer(msg.sender, link.balanceOf(address(this))),
             "Unable to transfer"
         );
     }*/
-}
