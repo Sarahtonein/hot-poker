@@ -1,8 +1,6 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
-const DECIMALS = 18; // Set the correct number of decimal places for your token
-
 async function main() {
   const hotPokerContract = await ethers.getContractFactory("hotPoker");
   const linkTokenAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
@@ -11,7 +9,7 @@ async function main() {
   const private_key = process.env.PRIVATE_KEY;
   console.log("Private Key:", private_key);
   const wallet = new ethers.Wallet(private_key, provider);
-
+  const [deployer] = await ethers.getSigners();
   const deploymentTransaction = await hotPokerContract.getDeployTransaction(linkTokenAddress, vrfWrapperAddress);
 
   // Send the deployment transaction
@@ -158,24 +156,184 @@ async function main() {
     }
   ];
   
+  const contractAddressABI = 
+    [
+      {
+        inputs: [ [Object], [Object] ],
+        stateMutability: 'nonpayable',
+        type: 'constructor'
+      },
+      {
+        anonymous: false,
+        inputs: [ [Object], [Object] ],
+        name: 'OwnershipTransferred',
+        type: 'event'
+      },
+      {
+        anonymous: false,
+        inputs: [ [Object] ],
+        name: 'debugEvent',
+        type: 'event'
+      },
+      {
+        anonymous: false,
+        inputs: [ [Object] ],
+        name: 'flowerResult',
+        type: 'event'
+      },
+      {
+        anonymous: false,
+        inputs: [ [Object] ],
+        name: 'flowerTypeEvent',
+        type: 'event'
+      },
+      {
+        anonymous: false,
+        inputs: [ [Object] ],
+        name: 'randomEvent',
+        type: 'event'
+      },
+      {
+        anonymous: false,
+        inputs: [ [Object] ],
+        name: 'requestIdEvent',
+        type: 'event'
+      },
+      {
+        inputs: [ [Object] ],
+        name: 'addressToBalance',
+        outputs: [ [Object] ],
+        stateMutability: 'view',
+        type: 'function'
+      },
+      {
+        "inputs": [],
+        "name": "checkBalance",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        inputs: [ [Object] ],
+        name: 'currentGuess',
+        outputs: [ [Object] ],
+        stateMutability: 'view',
+        type: 'function'
+      },
+      {
+        inputs: [],
+        name: 'depositFunds',
+        outputs: [],
+        stateMutability: 'payable',
+        type: 'function'
+      },
+      {
+        inputs: [ [Object] ],
+        name: 'gambleAmount',
+        outputs: [ [Object] ],
+        stateMutability: 'view',
+        type: 'function'
+      },
+      {
+        inputs: [],
+        name: 'owner',
+        outputs: [ [Object] ],
+        stateMutability: 'view',
+        type: 'function'
+      },
+      {
+        inputs: [{ type: 'uint256' }, { type: 'string' }],
+        name: 'playAGame',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function'
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "_requestId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "_randomWords",
+            "type": "uint256[]"
+          }
+        ],
+        "name": "fulfillRandomWords",
+        "outputs": [],
+        "stateMutability": "internal",
+        "type": "function"
+      },
+      {
+        inputs: [],
+        name: 'renounceOwnership',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function'
+      },
+      {
+        inputs: [ [Object] ],
+        name: 'transferOwnership',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function'
+      },
+      {
+        inputs: [ [Object] ],
+        name: 'winOrLose',
+        outputs: [ [Object] ],
+        stateMutability: 'view',
+        type: 'function'
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "_withdrawalAmount",
+            "type": "uint256"
+          }
+        ],
+        "name": "withdrawFunds",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+  ];
 
   const tokenContract = new ethers.Contract(linkTokenAddress, linkAbi, wallet);
+  const GameAddress = new ethers.Contract(contractAddress, contractAddressABI, deployer);
+  // Send token
+  console.log(`We're sending tokens to ${contractAddress}`);
+  const amountToSend = '100000000000000000';
+  //const transferAmount = 1;
+  //const tokenAmount = ethers.utils.parseUnits(transferAmount.toString(), DECIMALS);
+  //Problems with parseunits, lets just input what we want 100000000000000000 == 0.1 link
+  await tokenContract.transfer(contractAddress, amountToSend)
+    .then(function(tx) {
+     // console.log(tx);
+      console.log(`transferred ${amountToSend} Link tokens`);
+    });
+  //const tokenAmount = ethers.utils.parseUnits(transferAmount.toString(), DECIMALS);
 
-  //send token
-  const recipientAddress = contractAddress;
-  console.log(`We're sending tokens to ${recipientAddress}`);
+  //Now, lets send some gas to the contract
+  console.log('Attempting to send gas to the contract');
+  const depositTx = await GameAddress.depositFunds({ value: '10000000000000000' });
+  await depositTx.wait();
+  console.log("Funds deposited");
 
-
-  // Amount of tokens to send
-  const tokenAmount = ethers.utils.parseUnits("1", DECIMALS);
-  console.log(tokenAmount);
-  try {
-    const tx = await tokenContract.transfer(recipientAddress, tokenAmount);
-    await tx.wait();
-    console.log('Tokens sent successfully:', tx.hash);
-  } catch (error) {
-    console.error('Error sending tokens:', error);
-  }
+  //lets play a game
+  console.log('Attempting to play a game');
+  const playAGameTx = await GameAddress.playAGame('10000000000000000', 'Hot');
+  await playAGameTx.wait();
+  console.log('tx has', playAGameTx.hash);
 }
 
 main()
